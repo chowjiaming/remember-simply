@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Remember Simply</title>
+    <meta
+      name="description"
+      content="A simple itemlist built with pure JavaScript."
+    />
+    <meta name="keywords" content="todo,list,memory" />
+    <link rel="shortcut icon" href="img/icon.png" />
+    <link rel="stylesheet" href="styles/bulma.min.css" type="text/css" />
+    <link rel="stylesheet" href="styles/main.css" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <main>
+      <section class="section">
+        <h1 class="app-title">Remember Simply</h1>
+        <ul class="item-list js-item-list"></ul>
+        <div class="empty-state">
+          <img class="checklist-icon" src="img/icon.png" />
+          <h2 class="empty-state__title">
+            Add the first thing you need to remember below:
+          </h2>
+          <p class="empty-state__description">
+            What's on your mind today?
+          </p>
+        </div>
+
+        <form class="js-form">
+          <div class="container">
+            <input
+              autofocus
+              type="text"
+              aria-label="Enter a new itemitem"
+              placeholder="E.g. Get stamps"
+              class="js-item-input"
+            />
+            <button class="button is-primary is-pulled-right">
+              Add
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script type="text/javascript">
+      autorun = () => {
+        let memoryItems = [];
+
+        renderItem = (item) => {
+          const list = document.querySelector(".js-item-list");
+          list.insertAdjacentHTML(
+            "beforeend",
+            `
+              <div class="container">
+                <li class="memory-item" data-key="${item.id}">
+                  <input id="${item.id}" type="checkbox"/>
+                    <label for="${item.id}" class="tick js-tick"></label>
+                    <span>${item.text}</span>
+                    <button class="button is-danger is-pulled-right delete-item js-delete-item">
+                        Delete
+                    </button>
+                </li>
+              </div>
+            `
+          );
+        };
+
+        addItem = (text) => {
+          const item= {
+            text,
+            checked: false,
+            id: Date.now(),
+          };
+
+          memoryItems.push(item);
+          renderItem(item);
+        };
+
+        toggleDone = (key) => {
+          const index = memoryItems.findIndex((item) => item.id === Number(key));
+          memoryItems[index].checked = !memoryItems[index].checked;
+
+          const item = document.querySelector(`[data-key='${key}']`);
+          if (memoryItems[index].checked) item.classList.add("done");
+          else item.classList.remove("done");
+        };
+
+        deleteItem = (key) => {
+          memoryItems = memoryItems.filter((item) => item.id !== Number(key));
+          const item = document.querySelector(`[data-key='${key}']`);
+          item.remove();
+
+          const list = document.querySelector(".js-item-list");
+          if (memoryItems.length === 0) list.innerHTML = "";
+        };
+
+        const form = document.querySelector(".js-form");
+        form.addEventListener("submit", (event) => {
+          event.preventDefault();
+          const input = document.querySelector(".js-item-input");
+
+          const text = input.value.trim();
+          if (text !== "") {
+            addItem(text);
+            input.value = "";
+            input.focus();
+          }
+        });
+
+        const list = document.querySelector(".js-item-list");
+        list.addEventListener("click", (event) => {
+          if (event.target.classList.contains("js-tick")) {
+            const itemKey = event.target.parentElement.dataset.key;
+            toggleDone(itemKey);
+          }
+
+          if (event.target.classList.contains("js-delete-item")) {
+            const itemKey = event.target.parentElement.dataset.key;
+            deleteItem(itemKey);
+          }
+        });
+      };
+
+      if (document.addEventListener)
+        document.addEventListener("DOMContentLoaded", autorun, false);
+      else if (document.attachEvent)
+        document.attachEvent("onreadystatechange", autorun);
+      else window.onload = autorun;
+    </script>
+  </body>
+</html>
